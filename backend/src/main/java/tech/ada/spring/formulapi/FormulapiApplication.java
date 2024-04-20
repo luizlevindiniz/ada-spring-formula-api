@@ -8,6 +8,8 @@ public class FormulapiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FormulapiApplication.class, args);
+
+		System.out.println("It's online");
 	}
 
 }
