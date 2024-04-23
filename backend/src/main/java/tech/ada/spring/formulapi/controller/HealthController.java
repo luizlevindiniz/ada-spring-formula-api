@@ -11,6 +11,6 @@ public class HealthController {
     @GetMapping("/health")
     public String health() {
 
-        return "It's online";
+        return "Hello World!";
     }
 }
