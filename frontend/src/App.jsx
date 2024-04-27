@@ -1,39 +1,56 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useEffect, useState } from "react";
 import "./App.css";
 import PilotCard from "./components/PilotCard";
+import axios from "axios";
+import Typography from "@mui/material/Typography";
 
 function App() {
-  const [count, setCount] = useState(0);
+  async function getDrivers() {
+    const res = await axios.get("http://localhost:8080/api/drivers", {
+      auth: {
+        username: "admin",
+        password: "admin",
+      },
+      headers: {
+        "Content-type": "application/json",
+        "Access-Control-Allow-Origin": "http://localhost:8080",
+        "Access-Control-Allow-Headers":
+          "Origin, X-Requested-With, Content-Type, Accept",
+      },
+    });
+    if (res.status < 200 || res.status >= 400) {
+      console.log(res);
+      return;
+    }
+    setDrivers(res.data);
+  }
+
+  useEffect(() => {
+    getDrivers();
+  }, []);
+
+  const [drivers, setDrivers] = useState([]);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="outlet">
+      <Typography variant="h2" gutterBottom>
+        FormulAPI
+      </Typography>
+      <div className="pilot-wrapper">
+        {drivers.map((pilot) => {
+          return (
+            <PilotCard
+              key={pilot.driverId}
+              name={pilot.familyName}
+              subheader={pilot.givenName}
+              nationality={pilot.nationality}
+              dateOfBirth={pilot.dateOfBirth}
+              url={pilot.url}
+            ></PilotCard>
+          );
+        })}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-
-      <div>
-        <PilotCard></PilotCard>
-      </div>
-    </>
+    </div>
   );
 }
 

@@ -2,6 +2,7 @@ package tech.ada.spring.formulapi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin("http://localhost:5173")
 public class DriversController {
 
     private DriverService driverService;
@@ -22,15 +24,15 @@ public class DriversController {
         this.driverService = driverService;
     }
 
+    public DriversController() { }
 
-    @GetMapping("/drivers")
-    public List<Driver> drivers() {
+    public String initialize() {
 
         // RestTemplate
         RestTemplate restTemplate = new RestTemplate();
 
         // Endpoint
-        String url = "https://ergast.com/api/f1/drivers.json";
+        String url = "https://ergast.com/api/f1/2023/drivers.json";
 
         // Get
         ResponseEntity<Resp> response = restTemplate.getForEntity(url, Resp.class);
@@ -41,6 +43,29 @@ public class DriversController {
 
             List<Driver> drivers = response.getBody().getMRData().getDriverTable().getDrivers();
             drivers.forEach(driver -> driverService.saveDriver(driver));
+
+            return "Drivers initialized";
+
+        } else {
+            System.out.println("Error: Unsuccessful HTTP request. Status code: " + response.getStatusCodeValue());
+            throw new RuntimeException("Error: Unsuccessful HTTP request. Status code: " + response.getStatusCodeValue());
+        }
+    }
+
+    @GetMapping("/drivers")
+    public List<Driver> drivers() {
+
+        // RestTemplate
+        RestTemplate restTemplate = new RestTemplate();
+
+        // Endpoint
+        String url = "https://ergast.com/api/f1/2023/drivers.json";
+
+        // Get
+        ResponseEntity<Resp> response = restTemplate.getForEntity(url, Resp.class);
+
+        // Check the response status code
+        if (response.getStatusCode().is2xxSuccessful()) {
 
             return response.getBody().getMRData().getDriverTable().getDrivers();
 
